@@ -15,12 +15,14 @@ podcasts = [
         "name": "Dagsnytt 18",
         "url": "https://radio.nrk.no/podkast/dagsnytt_atten",
         "desc": "Dagsnytt 18",
+        "image": "https://gfx.nrk.no/ubikGDWzMrGIWK9ZweTgIgDxMtJ_l4IjNGnTXNhR5F-g",
         "fname": "dagsnytt18",
     },
     {
         "name": "Debatten",
         "url": "https://radio.nrk.no/podkast/debatten",
         "desc": "Debatten",
+        "image": "https://gfx.nrk.no/Af9YzwX723rS69Qgz3oHLw2IHEwG0DBRpFXyskY8gwrA",
         "fname": "debatten",
     },
 ]
@@ -77,6 +79,7 @@ if __name__ == "__main__":
                 pod.website = url
                 pod.description = desc
                 pod.explicit = False
+                pod.image = item["image"]
 
             for e in info["entries"]:
                 # The information returned has entries for both "episodes" and
@@ -100,6 +103,7 @@ if __name__ == "__main__":
                             episode_info["timestamp"],
                             tz=pytz.timezone("Europe/Oslo"),
                         )
+                        ep.image = episode_info["thumbnail"]
                         pod.add_episode(ep)
 
                         pod.rss_file(os.path.join(rss_file), encoding="UTF-8")
