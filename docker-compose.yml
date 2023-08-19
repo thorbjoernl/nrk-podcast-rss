@@ -2,13 +2,16 @@ version: "3"
 
 services:
   nrk-rss:
+    restart: always
     build:
       context: ./app
       dockerfile: Dockerfile
     network_mode: "host"
     volumes:
       - rss-data:/data
+      - persistent:/persistent
   web:
+    restart: always
     image: nginx
     ports:
       - 8000:80
@@ -16,3 +19,4 @@ services:
       - rss-data:/usr/share/nginx/html:ro
 volumes:
   rss-data:
+  persistent:
