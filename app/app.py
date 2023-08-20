@@ -6,6 +6,7 @@ import yt_dlp
 import datetime
 import pytz
 import pickle
+import threading
 from podgen import Podcast, Episode, Media
 
 # The podcasts to be downloaded. Additional podcasts can be added following the
@@ -17,6 +18,8 @@ podcasts = [
         "desc": "Dagsnytt 18",
         "image": "https://gfx.nrk.no/ubikGDWzMrGIWK9ZweTgIgDxMtJ_l4IjNGnTXNhR5F-g",
         "fname": "dagsnytt18",
+        "weekdays": [0, 1, 2, 3, 4],
+        "hours": [19, 20, 21],
     },
     {
         "name": "Debatten",
@@ -24,6 +27,8 @@ podcasts = [
         "desc": "Debatten",
         "image": "https://gfx.nrk.no/Af9YzwX723rS69Qgz3oHLw2IHEwG0DBRpFXyskY8gwrA",
         "fname": "debatten",
+        "weekdays": [1, 3],
+        "hours": [21, 22, 23],
     },
 ]
 
@@ -34,84 +39,93 @@ OUTPUT_DIR = "/data"
 # executions.
 PERSISTENT_DIR = "/persistent"
 
-if __name__ == "__main__":
-    while True:
-        # Load configuration.
-        config = configparser.ConfigParser()
-        config.read("./config/config.ini")
 
-        # Configure logging.
-        logger = logging.getLogger()
-        logger.addHandler(logging.StreamHandler())
-        logger.setLevel(config["logging"]["level"])
+def update_podcast(item: dict[str, str]):
+    url = item["url"]
+    title = item["name"]
+    desc = item["desc"]
 
-        for item in podcasts:
-            url = item["url"]
-            title = item["name"]
-            desc = item["desc"]
+    if item["weekdays"]:
+        if not (datetime.datetime.today().weekday() in item["weekdays"]):
+            logger.info(f"Skipping {title} due to weekday filtering.")
+            return
+    if item["hours"]:
+        if not (datetime.datetime.now().hour in item["hours"]):
+            logger.info(f"Skipping {title} due to hour filtering.")
 
-            # File paths for generated files.
-            archive_file = os.path.join(PERSISTENT_DIR, f"{item['fname']}.txt")
-            pickle_file = os.path.join(PERSISTENT_DIR, f"{item['fname']}.pickle")
-            rss_file = os.path.join(OUTPUT_DIR, f"{item['fname']}.rss")
-
-            ydl = yt_dlp.YoutubeDL()
-            info = ydl.extract_info(url, download=False, process=False)
-
-            try:
-                with open(archive_file, "r") as f:
-                    archive = set(f.read().splitlines())
-            except FileNotFoundError:
-                logger.info("No archive file found.")
-                archive = set([])
-
-            if os.path.isfile(pickle_file):
-                # https://github.com/lkiesow/python-feedgen/issues/72
-                # Workaround for podgen not being able to load from existing rss
-                # file.
-                logger.info("Loading existing Podcast object from pickle file")
-                with open(pickle_file, "rb") as f:
-                    pod = pickle.load(f)
+    # File paths for generated files.
+    archive_file = os.path.join(PERSISTENT_DIR, f"{item['fname']}.txt")
+    pickle_file = os.path.join(PERSISTENT_DIR, f"{item['fname']}.pickle")
+    rss_file = os.path.join(OUTPUT_DIR, f"{item['fname']}.rss")
+    ydl = yt_dlp.YoutubeDL()
+    info = ydl.extract_info(url, download=False, process=False)
+    try:
+        with open(archive_file, "r") as f:
+            archive = set(f.read().splitlines())
+    except FileNotFoundError:
+        logger.info("No archive file found.")
+        archive = set([])
+    if os.path.isfile(pickle_file):
+        # https://github.com/lkiesow/python-feedgen/issues/72
+        # Workaround for podgen not being able to load from existing rss
+        # file.
+        logger.info("Loading existing Podcast object from pickle file")
+        with open(pickle_file, "rb") as f:
+            pod = pickle.load(f)
+    else:
+        logger.info("No existing pickle found. Create new Podcast object")
+        pod = Podcast()
+        pod.name = title
+        pod.website = url
+        pod.description = desc
+        pod.explicit = False
+        pod.image = item["image"]
+    for e in info["entries"]:
+        # The information returned has entries for both "episodes" and
+        # "seasons". Only episodes have an "id" key, so we use that to
+        # only process the episodes.
+        if "id" in e.keys():
+            if e["url"] in archive:
+                logger.info(
+                    f"Skipping episode {e['url']}, due to already being in archive."
+                )
             else:
-                logger.info("No existing pickle found. Create new Podcast object")
-                pod = Podcast()
-                pod.name = title
-                pod.website = url
-                pod.description = desc
-                pod.explicit = False
-                pod.image = item["image"]
+                episode_info = ydl.extract_info(e["url"], download=False, process=True)
+                ep = Episode()
+                ep.title = episode_info["title"]
+                ep.summary = episode_info.get("summary", "")
+                ep.media = Media(episode_info["url"])
+                ep.publication_date = datetime.datetime.fromtimestamp(
+                    episode_info["timestamp"],
+                    tz=pytz.timezone("Europe/Oslo"),
+                )
+                ep.image = episode_info["thumbnail"]
+                pod.add_episode(ep)
+                pod.rss_file(os.path.join(rss_file), encoding="UTF-8")
+                with open(archive_file, "a") as f:
+                    f.write(e["url"] + "\n")
+                with open(pickle_file, "wb") as f:
+                    pickle.dump(pod, f)
 
-            for e in info["entries"]:
-                # The information returned has entries for both "episodes" and
-                # "seasons". Only episodes have an "id" key, so we use that to
-                # only process the episodes.
-                if "id" in e.keys():
-                    if e["url"] in archive:
-                        logger.info(
-                            f"Skipping episode {e['url']}, due to already being in archive."
-                        )
-                    else:
-                        episode_info = ydl.extract_info(
-                            e["url"], download=False, process=True
-                        )
 
-                        ep = Episode()
-                        ep.title = episode_info["title"]
-                        ep.summary = episode_info.get("summary", "")
-                        ep.media = Media(episode_info["url"])
-                        ep.publication_date = datetime.datetime.fromtimestamp(
-                            episode_info["timestamp"],
-                            tz=pytz.timezone("Europe/Oslo"),
-                        )
-                        ep.image = episode_info["thumbnail"]
-                        pod.add_episode(ep)
+if __name__ == "__main__":
+    # Load configuration.
+    config = configparser.ConfigParser()
+    config.read("./config/config.ini")
 
-                        pod.rss_file(os.path.join(rss_file), encoding="UTF-8")
+    # Configure logging.
+    logger = logging.getLogger()
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(config["logging"]["level"])
 
-                        with open(archive_file, "a") as f:
-                            f.write(e["url"] + "\n")
+    while True:
+        threads = []
+        for item in podcasts:
+            t = threading.Thread(target=update_podcast, args=(item,))
+            t.start()
+            threads.append(t)
 
-                        with open(pickle_file, "wb") as f:
-                            pickle.dump(pod, f)
+        for t in threads:
+            t.join()
 
         time.sleep(int(config["updates"]["frequency_sec"]))
