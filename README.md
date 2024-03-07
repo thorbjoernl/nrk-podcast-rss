@@ -13,3 +13,41 @@ The easiest way to run this program is via the docker-compose file:
 
 This will start the application, and host the rss feeds on
 `http://localhost:8000/*.rss`
+
+## Configuration
+
+The program is configured using the files `config.ini` and `config.json`.
+
+Config.ini has the following options:
+
+[logging]
+
+**level** - The Python [logging level](https://docs.python.org/3/library/logging.html#logging-levels)
+used by the program.
+
+[updates]
+
+**frequency** - The interval between refreshing podcasts in seconds.
+
+[podcasts]
+
+**ep_count** - The number of episodes to include when generating the feed.
+
+Config.json is a json file with a list of podcasts to generate for.
+
+```
+[
+    {
+        "name": "Debatten",
+        "url": "https://radio.nrk.no/podkast/debatten",
+        "desc": "Debatten",
+        "image": "https://gfx.nrk.no/Af9YzwX723rS69Qgz3oHLw2IHEwG0DBRpFXyskY8gwrA",
+        "fname": "debatten"
+    },
+    {
+        ...
+    }
+]
+```
+
+**Todo**: Detail options.
