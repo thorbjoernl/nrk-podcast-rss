@@ -120,6 +120,7 @@ def main():
         podcasts = json.load(f)
 
     while True:
+        iteration_start = time.perf_counter()
         threads: list[threading.Thread] = []
         for item in podcasts:
             t = threading.Thread(target=update_podcast, args=(item,))
@@ -129,7 +130,9 @@ def main():
         for t in threads:
             t.join()
 
-        time.sleep(int(config["updates"]["frequency_sec"]))
+        iteration_time = time.perf_counter() - iteration_start
+
+        time.sleep(max([int(config["updates"]["frequency_sec"] - iteration_time), 0]))
 
 
 if __name__ == "__main__":
