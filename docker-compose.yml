@@ -10,6 +10,7 @@ services:
     volumes:
       - rss-data:/data
       - persistent:/persistent
+      - ./config:/config
   web:
     restart: always
     image: nginx
