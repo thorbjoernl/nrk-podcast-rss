@@ -10,6 +10,7 @@ import threading
 import urllib.request
 import json
 from podgen import Podcast, Episode, Media
+from config.podcast_config_parser import PodcastConfigParser
 
 CONFIG_DIR = os.path.join("/", "config")
 
@@ -25,26 +26,20 @@ PERSISTENT_DIR = os.path.join("/", "persistent")
 
 
 def update_podcast(item: dict[str, str]):
-    url = item["url"]
-    title = item["name"]
-    desc = item["desc"]
-
     # Skip podcast update based on filter settings.
-    if "weekdays" in item.keys():
-        if not (datetime.datetime.today().weekday() in item["weekdays"]):
-            logging.info(f"Skipping {title} due to weekday filtering.")
-            return
-    if "hours" in item.keys():
-        if not (datetime.datetime.now().hour in item["hours"]):
-            logging.info(f"Skipping {title} due to hour filtering.")
-            return
+    if not (datetime.datetime.today().weekday() in item["weekdays"]):
+        logging.info(f"Skipping {item['name']} due to weekday filtering.")
+        return
+    if not (datetime.datetime.now().hour in item["hours"]):
+        logging.info(f"Skipping {item['name']} due to hour filtering.")
+        return
 
     # File paths for generated files.
     archive_file = os.path.join(PERSISTENT_DIR, f"{item['fname']}.txt")
     pickle_file = os.path.join(PERSISTENT_DIR, f"{item['fname']}.pickle")
     rss_file = os.path.join(OUTPUT_DIR, f"{item['fname']}.rss")
     ydl = yt_dlp.YoutubeDL()
-    info = ydl.extract_info(url, download=False, process=False)
+    info = ydl.extract_info(item["url"], download=False, process=False)
     try:
         with open(archive_file, "r") as f:
             archive = set(f.read().splitlines())
@@ -61,10 +56,10 @@ def update_podcast(item: dict[str, str]):
     else:
         logging.info("No existing pickle found. Create new Podcast object")
         pod = Podcast()
-        pod.name = title
-        pod.website = url
-        pod.description = desc
-        pod.explicit = False
+        pod.name = item["name"]
+        pod.website = item["url"]
+        pod.description = item["desc"]
+        pod.explicit = item["explicit"]
         pod.image = item["image"]
 
     episode_counter = 0
@@ -85,7 +80,7 @@ def update_podcast(item: dict[str, str]):
                         e["url"], download=False, process=True
                     )
                 except yt_dlp.utils.DownloadError as error:
-                    logging.error(f"{title} - Failed to download {e['id']}")
+                    logging.error(f"{item['name']} - Failed to download {e['id']}")
                     logging.info(error)
                 else:
                     ep = Episode()
@@ -120,7 +115,7 @@ def main():
     logging.basicConfig(level=config["logging"]["level"])
 
     with open(os.path.join(CONFIG_DIR, "config.json"), "r") as f:
-        podcasts = json.load(f)
+        podcasts = PodcastConfigParser.parse_podcasts(f)
 
     while True:
         refresh_start = time.perf_counter()
