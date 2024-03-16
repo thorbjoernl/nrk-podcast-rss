@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Optional, Mapping
+
 import json
+from typing import Mapping, Optional
 
 DEFAULT_PODCAST_IMAGE_URL = "https://raw.githubusercontent.com/thorbjoernl/nrk-podcast-rss/main/img/default_podcast.png"
 DEFAULT_PODCAST_TITLE = "Untitled Podcast"
@@ -26,10 +27,8 @@ class PodcastConfigParser:
         if isinstance(weekday, int):
             return weekday
 
-        lcase = weekday.lower()
-
         for i, s in enumerate(WEEKDAY_PREFIXES):
-            if s == lcase[0:3]:
+            if s == weekday.lower()[0:3]:
                 return i
 
         raise PodcastConfigurationError(
@@ -39,7 +38,7 @@ class PodcastConfigParser:
     @staticmethod
     def canonicalize_weekdays(weekdays: Optional[list]) -> set:
         """
-        Returns a set of weekdays as a list of numbers, 0-6, where
+        Returns a set of weekdays as a set of numbers, 0-6, where
         0 is monday and 6 is sunday.
         """
         if weekdays is None:
@@ -81,7 +80,7 @@ class PodcastConfigParser:
     def parse_podcasts(f) -> list[dict]:
         """
         Parses a podcast.json config file, setting missing values to defaults
-        where appropriate and raisin PodcastConfigurationError for required
+        where appropriate and raising PodcastConfigurationError for required
         options.
         f can be a file, or a list of mappings.
         Returns a list of dicts.

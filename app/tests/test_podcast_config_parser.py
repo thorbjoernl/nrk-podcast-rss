@@ -1,11 +1,12 @@
 import pytest
 from config.podcast_config_parser import (
-    PodcastConfigParser,
-    PodcastConfigurationError,
-    DEFAULT_PODCAST_IMAGE_URL,
     DEFAULT_PODCAST_DESC,
     DEFAULT_PODCAST_EXPLICIT,
+    DEFAULT_PODCAST_IMAGE_URL,
     DEFAULT_PODCAST_TITLE,
+    WEEKDAY_PREFIXES,
+    PodcastConfigParser,
+    PodcastConfigurationError,
 )
 
 
@@ -91,10 +92,12 @@ def test_assignment():
 
 
 def test_str_weekdays():
-    assert PodcastConfigParser.parse_podcasts(
-        [{"url": "test", "fname": "test", "weekdays": ["mon", "tue", 4]}]
-    )[0]["weekdays"] == set([0, 1, 4])
+    for i, wd in enumerate(WEEKDAY_PREFIXES):
+        assert PodcastConfigParser.parse_podcasts(
+            [{"url": "test", "fname": "test", "weekdays": [wd]}]
+        )[0]["weekdays"] == set([i])
 
-    assert PodcastConfigParser.parse_podcasts(
-        [{"url": "test", "fname": "test", "weekdays": ["monday", "wednesday", 6]}]
-    )[0]["weekdays"] == set([0, 2, 6])
+    with pytest.raises(PodcastConfigurationError):
+        PodcastConfigParser.parse_podcasts(
+            [{"url": "test", "fname": "test", "weekdays": ["Lorem Ipsum"]}]
+        )

@@ -1,16 +1,17 @@
-import os
-import logging
 import configparser
-import time
-import yt_dlp
 import datetime
-import pytz
+import json
+import logging
+import os
 import pickle
 import threading
+import time
 import urllib.request
-import json
-from podgen import Podcast, Episode, Media
+
+import pytz
+import yt_dlp
 from config.podcast_config_parser import PodcastConfigParser
+from podgen import Episode, Media, Podcast
 
 CONFIG_DIR = os.path.join("/", "config")
 
