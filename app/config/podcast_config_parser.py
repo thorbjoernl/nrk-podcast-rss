@@ -77,10 +77,10 @@ class PodcastConfigParser:
         for i, p in enumerate(f, start=1):
             new_item = {}
 
-            if not p["url"]:
+            if not p.get("url", None):
                 raise PodcastConfigurationError(f"Missing url for podcast {i}.")
 
-            if not p["fname"]:
+            if not p.get("fname", None):
                 raise PodcastConfigurationError(f"Missing fname for podcast {i}.")
 
             new_item["url"] = p["url"]
