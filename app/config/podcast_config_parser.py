@@ -3,7 +3,7 @@ from typing import Optional, Mapping
 import json
 
 DEFAULT_PODCAST_IMAGE_URL = (
-    "https://f003.backblazeb2.com/file/VTZ2U-PUBLIC/default_podcast.png"
+    "https://raw.githubusercontent.com/thorbjoernl/nrk-podcast-rss/main/img/default_podcast.png"
 )
 DEFAULT_PODCAST_TITLE = "Untitled Podcast"
 DEFAULT_PODCAST_DESC = ""
