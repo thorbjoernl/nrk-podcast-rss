@@ -2,12 +2,12 @@ from __future__ import annotations
 from typing import Optional, Mapping
 import json
 
-DEFAULT_PODCAST_IMAGE_URL = (
-    "https://raw.githubusercontent.com/thorbjoernl/nrk-podcast-rss/main/img/default_podcast.png"
-)
+DEFAULT_PODCAST_IMAGE_URL = "https://raw.githubusercontent.com/thorbjoernl/nrk-podcast-rss/main/img/default_podcast.png"
 DEFAULT_PODCAST_TITLE = "Untitled Podcast"
 DEFAULT_PODCAST_DESC = ""
 DEFAULT_PODCAST_EXPLICIT = False
+
+WEEKDAY_PREFIXES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
 
 class PodcastConfigurationError(ValueError):
@@ -21,6 +21,22 @@ class PodcastConfigParser:
     """
 
     @staticmethod
+    def weekdaystr_as_int(weekday: str | int) -> int:
+        """ """
+        if isinstance(weekday, int):
+            return weekday
+
+        lcase = weekday.lower()
+
+        for i, s in enumerate(WEEKDAY_PREFIXES):
+            if s == lcase[0:3]:
+                return i
+
+        raise PodcastConfigurationError(
+            "Could not convert weekday, {weekday} to integer."
+        )
+
+    @staticmethod
     def canonicalize_weekdays(weekdays: Optional[list]) -> set:
         """
         Returns a set of weekdays as a list of numbers, 0-6, where
@@ -28,6 +44,10 @@ class PodcastConfigParser:
         """
         if weekdays is None:
             return set(range(7))
+
+        weekdays = list(
+            map(lambda x: PodcastConfigParser.weekdaystr_as_int(x), weekdays)
+        )
 
         for i in weekdays:
             if not isinstance(i, int):
@@ -37,7 +57,6 @@ class PodcastConfigParser:
                     f"{i} is out of bounds for weekday configuration."
                 )
 
-        # TODO: Allow other forms such as ["mon", "tue", ...]
         return set(weekdays)
 
     @staticmethod

@@ -88,3 +88,13 @@ def test_assignment():
         )[0]["image"]
         == "SomeImageURL"
     )
+
+
+def test_str_weekdays():
+    assert PodcastConfigParser.parse_podcasts(
+        [{"url": "test", "fname": "test", "weekdays": ["mon", "tue", 4]}]
+    )[0]["weekdays"] == set([0, 1, 4])
+
+    assert PodcastConfigParser.parse_podcasts(
+        [{"url": "test", "fname": "test", "weekdays": ["monday", "wednesday", 6]}]
+    )[0]["weekdays"] == set([0, 2, 6])
