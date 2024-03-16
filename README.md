@@ -50,4 +50,15 @@ Config.json is a json file with a list of podcasts to generate for.
 ]
 ```
 
-**Todo**: Detail options.
+The following options are available:
+
+- **url** (string; **required**) - The url of the podcast on https://radio.nrk.no
+- **fname** (string; **required**) - Root of the filename to be used for the resulting feed. Should be unique between podcasts, and only use characters that are allowed in a file name.
+- **name** (string; default: 'Untitled Podcast') - The name of the podcast.
+- **desc** (string; default: '') - Description for the podcast.
+- **image** (string; default: 'https://raw.githubusercontent.com/thorbjoernl/nrk-podcast-rss/main/img/default_podcast.png') - Image url for the podcast.
+- **explicit** (string; default: false) - Boolean indicating whether the podcast contains explicit content.
+- **weekdays** (list of integers or strings; default: [0..6]) - If integer 0 is monday and 6 is sunday. If string, the first three characters must match the english name of the weekday. The podcast will only be updated on matching weekdays. Example configurations: ["mon", "tue", "wed", "thu", "fri"], [0, 1, 2, 3, 4]
+- **hours** (list of integers; default: [0..23]) - Hours during the days where the podcast will be updated. For example if [7, 8, 9], the podcast will only be updated if current time is 07:XX, 08:XX, 09:XX.
+
+Both weekdays and hours filtering must be met for the podcast to update.
