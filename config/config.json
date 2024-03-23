@@ -5,5 +5,19 @@
         "desc": "Debatten",
         "image": "https://gfx.nrk.no/Af9YzwX723rS69Qgz3oHLw2IHEwG0DBRpFXyskY8gwrA",
         "fname": "debatten"
+    },
+    {
+        "name": "Politiks Kvarter",
+        "url": "https://radio.nrk.no/podkast/politisk_kvarter",
+        "desc": "Politisk kvarter",
+        "image": "https://gfx.nrk.no/HQOdXZJnFNWwrd9x8VTcIQCyjTvHEIvXRAqwj4qrBaGg",
+        "fname": "politisk_kvarter"
+    },
+    {
+        "name": "Dagsnytt 18",
+        "url": "https://radio.nrk.no/podkast/dagsnytt_atten",
+        "desc": "Dagsnytt 18",
+        "image": "https://gfx.nrk.no/yUFGUAeLwdu5MgY-ApA0Igjv6UwE6TWYKpNY3_p6g41Q",
+        "fname": "dax18"
     }
 ]

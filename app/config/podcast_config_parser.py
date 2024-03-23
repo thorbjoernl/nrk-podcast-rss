@@ -7,6 +7,7 @@ DEFAULT_PODCAST_IMAGE_URL = "https://raw.githubusercontent.com/thorbjoernl/nrk-p
 DEFAULT_PODCAST_TITLE = "Untitled Podcast"
 DEFAULT_PODCAST_DESC = ""
 DEFAULT_PODCAST_EXPLICIT = False
+DEFAULT_PODCAST_EPISODE_COUNT = 10
 
 WEEKDAY_PREFIXES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
@@ -114,6 +115,10 @@ class PodcastConfigParser:
             )
             new_item["hours"] = PodcastConfigParser.canonicalize_hours(
                 p.get("hours", None)
+            )
+
+            new_item["episode_count"] = p.get(
+                "deepisode_countlay", DEFAULT_PODCAST_EPISODE_COUNT
             )
 
             output.append(new_item)
