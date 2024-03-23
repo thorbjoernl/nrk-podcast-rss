@@ -4,9 +4,8 @@ import os
 import time
 
 from config.podcast_config_parser import PodcastConfigParser
+from const import CONFIG_DIR
 from rssextractor import RSSExtractor
-
-CONFIG_DIR = os.path.join("/", "config")
 
 config = configparser.ConfigParser()
 config.read(os.path.join(CONFIG_DIR, "config.ini"))

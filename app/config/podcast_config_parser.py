@@ -3,13 +3,14 @@ from __future__ import annotations
 import json
 from typing import Mapping, Optional
 
-DEFAULT_PODCAST_IMAGE_URL = "https://raw.githubusercontent.com/thorbjoernl/nrk-podcast-rss/main/img/default_podcast.png"
-DEFAULT_PODCAST_TITLE = "Untitled Podcast"
-DEFAULT_PODCAST_DESC = ""
-DEFAULT_PODCAST_EXPLICIT = False
-DEFAULT_PODCAST_EPISODE_COUNT = 10
-
-WEEKDAY_PREFIXES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+from const import (
+    DEFAULT_PODCAST_DESC,
+    DEFAULT_PODCAST_EPISODE_COUNT,
+    DEFAULT_PODCAST_EXPLICIT,
+    DEFAULT_PODCAST_IMAGE_URL,
+    DEFAULT_PODCAST_TITLE,
+    WEEKDAY_PREFIXES,
+)
 
 
 class PodcastConfigurationError(ValueError):
