@@ -12,7 +12,19 @@ from podgen import Episode, Media, Podcast
 
 
 class RSSExtractor(Thread):
+    """
+    Class which implements the extraction of a podcast. It is used the same way
+    as a Python threads class (https://docs.python.org/3/library/threading.html).
+    """
+
     def __init__(self, config: dict):
+        """
+        Initializes the extractor given a configuration dictionary.
+
+        config : dict
+            A config dictionary as prepared by
+            config.podcast_config_parser.PodcastConfigParser
+        """
         super(RSSExtractor, self).__init__()
         self.config = config
 

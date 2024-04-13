@@ -25,8 +25,35 @@ class PodcastConfigParser:
 
     @staticmethod
     def weekdaystr_as_int(weekday: str | int) -> int:
-        """ """
+        """
+        Converts a weekday name or int into a weekday int as
+        understood by datetime (https://docs.python.org/3/library/datetime.html#datetime.date.weekday)
+
+        Weekday strings are matched based on the first three
+        characters of the english name (ie. 'mon', 'monday'
+        both evaluate to 1).
+
+        Parameters:
+        -----------
+        weekday : str | int
+            The weekday to be converted.
+
+        Returns:
+        --------
+        int
+            The sanitized weekday.
+
+        Raises:
+        -------
+        PodcastConfigurationError
+            If weekday can't be sanitized.
+        """
+
         if isinstance(weekday, int):
+            if weekday < 1 or weekday > 7:
+                raise PodcastConfigurationError(
+                    f"Unexpected weekday value, {weekday}. Weekday int should be between 1 and 7."
+                )
             return weekday
 
         for i, s in enumerate(WEEKDAY_PREFIXES):
