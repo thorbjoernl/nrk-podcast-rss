@@ -90,6 +90,8 @@ class RSSExtractor(Thread):
                         ep = Episode()
                         ep.title = episode_info["title"]
                         ep.summary = episode_info.get("summary", "")
+                        if(not ep.summary):
+                           ep.summary = episode_info.get("alt_title", "")
                         ep.media = Media
 
                         request = urllib.request.Request(
