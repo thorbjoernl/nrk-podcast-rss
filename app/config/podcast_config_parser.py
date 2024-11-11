@@ -146,7 +146,7 @@ class PodcastConfigParser:
             )
 
             new_item["episode_count"] = p.get(
-                "deepisode_countlay", DEFAULT_PODCAST_EPISODE_COUNT
+                "episode_count", DEFAULT_PODCAST_EPISODE_COUNT
             )
 
             output.append(new_item)
